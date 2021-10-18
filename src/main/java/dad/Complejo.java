@@ -38,4 +38,6 @@ public class Complejo {
         this.imaginarioProperty().set(imaginario);
     }
 
+    
+
 }
