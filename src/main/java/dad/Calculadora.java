@@ -6,7 +6,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
@@ -21,7 +20,6 @@ public class Calculadora extends Application {
     private TextField textFieldA, textFieldB, textFieldC, textFieldD;
     private TextField finalA, finalB;
     private ComboBox<String> operaciones;
-    private Button button;
 
     private Complejo numeroA, numeroB, numeroC, numeroD, finalCA, finalCB;
     private StringProperty operacionesProperty;
@@ -64,8 +62,6 @@ public class Calculadora extends Application {
         finalB.setPrefWidth(60);
         finalB.setEditable(false);
 
-        button = new Button("=");
-
         operaciones = new ComboBox<>();
         operaciones.getItems().addAll("+", "-", "*", "/");
 
@@ -76,16 +72,13 @@ public class Calculadora extends Application {
         VBox izquierda = new VBox(5, operaciones);
         izquierda.setAlignment(Pos.CENTER);
 
-        VBox central = new VBox(5, primFila, segFila, new Separator(), tercFila);
-        central.setAlignment(Pos.CENTER);
-
-        VBox derecha = new VBox(5, button);
+        VBox derecha = new VBox(5, primFila, segFila, new Separator(), tercFila);
         derecha.setAlignment(Pos.CENTER);
 
-        HBox root = new HBox(5, izquierda, central, derecha);
+        HBox root = new HBox(5, izquierda, derecha);
         root.setAlignment(Pos.CENTER);
 
-        Scene scene = new Scene(root,640,300);
+        Scene scene = new Scene(root, 500, 300);
 
         primaryStage.setTitle("Calculadora Compleja");
         primaryStage.setScene(scene);
@@ -103,13 +96,16 @@ public class Calculadora extends Application {
         Bindings.bindBidirectional(finalB.textProperty(), finalCB.imaginarioProperty(), new NumberStringConverter());
         operacionesProperty.bind(operaciones.getSelectionModel().selectedItemProperty());
 
-        button.setOnAction(e -> onOperando(operaciones.getSelectionModel().getSelectedItem()));
+        // button.setOnAction(e ->
+        // onOperando(operaciones.getSelectionModel().getSelectedItem()));
+
+        operacionesProperty.addListener(((o, ov, nv) -> onOperando(nv)));
 
     }
 
-    private void onOperando(String operador) {
+    private void onOperando(String nv) {
 
-        switch (operador) {
+        switch (nv) {
         case "+":
             finalCA.realProperty().bind(numeroA.realProperty().add(numeroC.realProperty()));
             finalCB.imaginarioProperty().bind(numeroB.imaginarioProperty().add(numeroD.imaginarioProperty()));
@@ -121,24 +117,26 @@ public class Calculadora extends Application {
             break;
 
         case "*":
-            finalCA.realProperty().bind(numeroA.realProperty().multiply(numeroC.realProperty())
-                    .subtract(numeroB.imaginarioProperty()).multiply(numeroD.imaginarioProperty()));
+            finalCA.realProperty().bind((numeroA.realProperty().multiply(numeroC.realProperty()))
+                    .subtract((numeroB.imaginarioProperty()).multiply(numeroD.imaginarioProperty())));
 
-            finalCA.realProperty().bind(numeroA.realProperty().multiply(numeroD.imaginarioProperty())
-                    .subtract(numeroB.imaginarioProperty()).multiply(numeroC.realProperty()));
+            finalCB.imaginarioProperty().bind(numeroA.realProperty().multiply(numeroD.imaginarioProperty())
+                    .add(numeroB.imaginarioProperty()).multiply(numeroC.realProperty()));
+            break;
 
         case "/":
             finalCA.realProperty()
-                    .bind((numeroA.realProperty().multiply(numeroC.realProperty())
-                            .add(numeroB.imaginarioProperty().multiply(numeroD.imaginarioProperty())))
+                    .bind(((numeroA.realProperty().multiply(numeroC.realProperty()))
+                            .add((numeroB.imaginarioProperty().multiply(numeroD.imaginarioProperty()))))
                                     .divide((numeroC.realProperty().multiply(numeroC.realProperty()))
                                             .add(numeroD.imaginarioProperty().multiply(numeroD.imaginarioProperty()))));
 
-            finalCB.realProperty()
-                    .bind((numeroB.imaginarioProperty().multiply(numeroC.realProperty())
-                            .add(numeroA.realProperty().multiply(numeroD.imaginarioProperty())))
+            finalCB.imaginarioProperty()
+                    .bind(((numeroB.imaginarioProperty().multiply(numeroC.realProperty()))
+                            .subtract((numeroA.realProperty().multiply(numeroD.imaginarioProperty()))))
                                     .divide((numeroC.realProperty().multiply(numeroC.realProperty()))
                                             .add(numeroD.imaginarioProperty().multiply(numeroD.imaginarioProperty()))));
+            break;
         default:
             break;
         }
